@@ -19,7 +19,8 @@ sleep.
 This script should be called by `acpid` or `systemd` when an interesting
 event (like dock/undock or suspend/resume) occurs. The source for the event
 (`acpid` or `systemd`) should be passed as the first argument, the event
-itself (and possibly more strings) as further arguments.
+itself (and possibly more strings) as further arguments.  The arguments are
+written to all pipes that match (per default) `/tmp/uens-*.fifo`.
 
 ATTENTION: When calling this script from `acpid`/`systemd` (as root), make
 sure that it is not writeable by any user. This can for example be achieved
@@ -30,6 +31,9 @@ as follows (run commands as root):
 # chown root:root /usr/bin/uens-{send,listen}
 # chmod 755 /usr/bin/uens-{send,listen}
 ```
+
+The script can be configured by writing values for the environment variables
+used to `/etc/default/uens`.
 
 For example, catching dock/undock events on a Lenovo Thinkpad X220 can be
 processed by creating the following files:
