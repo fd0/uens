@@ -1,0 +1,30 @@
+#!/bin/bash
+# Copyright (c) 2014, Alexander Neumann <alexander@bumpern.de>
+
+# expand globbing to empty list if no files match
+shopt -s nullglob
+
+# try to load global configuration
+GLOBAL_CONFIG="/etc/default/uens"
+if [[ -r "$GLOBAL_CONFIG" ]]; then
+    source "$GLOBAL_CONFIG"
+fi
+
+# use default if USER_FIFOS array is not set
+if [[ -z "${USER_FIFOS+x}" ]]; then
+    USER_FIFOS=(/tmp/uens-*.fifo)
+fi
+
+# exit if array is empty
+if [[ "${#USER_FIFOS[@]}" = 0 ]]; then
+    # nothing to do
+    exit 0
+fi
+
+for file in "${USER_FIFOS[@]}"; do
+    # open fifo
+    exec 4<> $file
+
+    # write command line arguments to fifo
+    echo "$@" >&4
+done
