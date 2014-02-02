@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2014, Alexander Neumann <alexander@bumpern.de>
 
 # expand globbing to empty list if no files match
