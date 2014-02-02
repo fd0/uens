@@ -36,8 +36,8 @@ cleanup() {
     exit 0
 }
 
-if [[ -p "$PIPE" ]]; then
-    echo "named pipe $PIPE already exists!"
+if [[ -e "$PIPE" ]]; then
+    echo "$PIPE already exists!"
     exit 1
 fi
 
