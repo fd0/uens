@@ -1,30 +1,24 @@
 #!/usr/bin/env bash
 # Copyright (c) 2014, Alexander Neumann <alexander@bumpern.de>
 
-# expand globbing to empty list if no files match
-shopt -s nullglob
-
 # try to load global configuration
 GLOBAL_CONFIG="/etc/default/uens"
 if [[ -r "$GLOBAL_CONFIG" ]]; then
     source "$GLOBAL_CONFIG"
 fi
 
-# use default if USER_FIFOS array is not set
-if [[ -z "${USER_FIFOS+x}" ]]; then
-    USER_FIFOS=(/tmp/uens-*.fifo)
+# use default if LOGFILE is not set
+if [[ -z "${LOGFILE+x}" ]]; then
+    LOGFILE=/var/run/uens/events.log
 fi
 
-# exit if array is empty
-if [[ "${#USER_FIFOS[@]}" = 0 ]]; then
-    # nothing to do
-    exit 0
-fi
+# create logfile path
+LOGDIR="$(dirname "$LOGFILE")"
+install -d -m 755 "$LOGDIR"
 
-for file in "${USER_FIFOS[@]}"; do
-    # open fifo
-    exec 4<> $file
+# create logfile
+touch "$LOGFILE"
+chmod 644 "$LOGFILE"
 
-    # write command line arguments to fifo
-    echo "$@" >&4
-done
+# write command line arguments to log file
+echo "$(date '+%Y%m%d%H%M%S') $@" >> "$LOGFILE"

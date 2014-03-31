@@ -20,6 +20,7 @@ fi
 # set default values
 USER_CONFIG_DIR="${USER_CONFIG_DIR:-$HOME/.config/uens}"
 USER_CONFIG="${USER_CONFIG:-$USER_CONFIG_DIR/config}"
+LOGFILE="${LOGFILE:-/var/run/uens/events.log}"
 DEBUG=${DEBUG-}
 
 # try to load user configuration
@@ -27,31 +28,10 @@ if [[ -r "$USER_CONFIG" ]]; then
     source "$USER_CONFIG"
 fi
 
-PIPE="${PIPE:-/tmp/uens-${USER}-${DISPLAY}-$$.fifo}"
 SCRIPTS="${SCRIPTS:-$HOME/.config/uens/scripts/}"
 
-cleanup() {
-    debug "cleanup pipe $PIPE"
-    rm -f "$PIPE"
-    exit 0
-}
-
-if [[ -e "$PIPE" ]]; then
-    echo "$PIPE already exists!"
-    exit 1
-fi
-
-debug "create pipe $PIPE"
-mkfifo -m 600 -- "$PIPE"
-
-# install cleanup handler
-trap cleanup 2 15
-
-# open pipe
-exec 4<> "$PIPE"
-
 # read events
-while read SOURCE EVENT OTHER <&4; do
+tail -n 0 -F "$LOGFILE" 2>/dev/null | while read TIMESTAMP SOURCE EVENT OTHER; do
     debug "read: source $SOURCE, event $EVENT $OTHER"
 
     # try to run script

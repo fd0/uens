@@ -20,11 +20,11 @@ This script should be called by `acpid` or `systemd` when an interesting
 event (like dock/undock or suspend/resume) occurs. The source for the event
 (`acpid` or `systemd`) should be passed as the first argument, the event
 itself (and possibly more strings) as further arguments.  The arguments are
-written to all pipes that match (per default) `/tmp/uens-*.fifo`.
+written to a logfile (`/var/run/uens/events.log`), together with a timestamp.
 
 ATTENTION: When calling this script from `acpid`/`systemd` (as root), make
-sure that it is not writeable by any user. This can for example be achieved
-as follows (run commands as root):
+sure that the script itself is not writeable by any user. This can for example
+be achieved as follows (run commands as root):
 
 ```shell
 # cp uens-{send,listen} /usr/bin
@@ -77,14 +77,11 @@ WantedBy=sleep.target
 `uens-listen`
 -------------
 
-This script creates and listens to a named pipe, by default at
-`/tmp/uens-$USER-$DISPLAY-$$`, where `$$` is expanded to process id of the
-current process. The mode of this named pipe is set to 0600, so that only
-the user and root are able to write to the pipe. The script then reads lines
-from this pipe and expects the following format:
+This script reads new lines from the log file created by `uens-send`. The
+lines in that log file are formatted as follows:
 
 ```
-SOURCE EVENT OTHER
+TIMESTAMP SOURCE EVENT OTHER
 ```
 
 When such a line is read, the script tries to execute all scripts within
